@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f172a"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icons/icon.svg" type="image/svg+xml"><title>Photo Tools · DoF e Inquadratura</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#15233b;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}.app{max-width:760px;margin:auto;padding:18px 14px 50px}h1{font-size:26px;margin:0 0 6px}p{color:#64748b;margin:4px 0 18px}.card{background:white;padding:20px;border:1px solid #e2e8f0;border-radius:18px;margin:15px 0;box-shadow:0 4px 20px #10204008}h2{font-size:16px;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:13px;font-weight:650;margin:0 0 5px}input,select{width:100%;border-radius:9px;border:1px solid #cbd5e1;background:white;padding:11px;font:inherit;font-size:16px;min-width:0}input:focus,select:focus{outline:2px solid #60a5fa}.unit{font-size:12px;color:#64748b}.wide{grid-column:1/-1}.results{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#f1f5ff;padding:14px;border-radius:12px;min-width:0}.metric span{display:block;font-size:12px;color:#56667f}.metric strong{display:block;font-size:clamp(20px,5vw,30px);font-variant-numeric:tabular-nums;color:#233fc5}.metric.alt{background:#f8fafc}.metric.alt strong{font-size:21px;color:#15233b}.viz{position:relative;height:100px;background:#edf1f7;border-radius:10px;overflow:hidden;margin-top:14px}.range{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#a6bafa,#466cf1)}.line{position:absolute;top:0;bottom:0;border-left:2px solid #1d4ed8}.line.focus{border-style:dashed;border-color:#14244a}.tag{position:absolute;z-index:2;transform:translateX(-50%);background:white;border-radius:6px;padding:3px 5px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 1px 5px #182a4e2b}.tag.near{top:8px}.tag.far{bottom:8px}.scales{display:flex;justify-content:space-between;color:#64748b;font-size:11px;margin-top:7px;gap:5px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}td,th{padding:9px 4px;border-bottom:1px solid #e2e8f0;text-align:right;font-size:13px}td:first-child,th:first-child{text-align:left}tr.selected{background:#eaf0ff;color:#243fc5;font-weight:bold}.button{border:1px solid #cbd5e1;background:white;border-radius:10px;padding:10px 14px;font:600 13px system-ui;cursor:pointer}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.error{color:#b42318;font-size:13px;margin-top:10px}.small{font-size:12px;color:#64748b;margin:11px 0 0}@media(max-width:420px){.card{padding:14px}.metric{padding:10px}.scales{font-size:10px}}@media print{body{background:white}.buttons{display:none}}
+</style></head><body><main class="app"><h1>📷 Photo Tools</h1><p>Calcolatore di inquadratura e profondità di campo · v1.2</p>
+<section class="card"><h2>Configurazione</h2><div class="grid">
+<div><label for="focal">Lunghezza focale · mm</label><input id="focal" type="number" min="1" max="1200" step="1" value="85"></div>
+<div><label for="aperture">Diaframma</label><select id="aperture"><option>1.2</option><option>1.4</option><option selected>1.8</option><option>2</option><option>2.8</option><option>4</option><option>5.6</option><option>8</option><option>11</option><option>16</option><option>22</option></select></div>
+<div><label for="distanceInput">Distanza dal soggetto · m</label><input id="distanceInput" type="number" min="0.01" step="0.01" value="5.28"></div>
+<div><label for="height">Altezza soggetto · cm</label><input id="height" type="number" min="0.1" step="1" value="200"></div>
+<div><label for="margin">Margine di inquadratura · %</label><input id="margin" type="number" step="1" value="10"></div>
+<div><label for="coc">Circolo di confusione · mm</label><input id="coc" type="number" min="0.001" max="0.1" step="0.001" value="0.03"></div>
+<div><label for="sensor">Sensore</label><select id="sensor"><option value="ff">Full frame (36 × 24)</option><option value="sony">APS-C Sony (23,5 × 15,6)</option><option value="canon">APS-C Canon (22,3 × 14,9)</option><option value="m43">Micro 4/3 (17,3 × 13)</option><option value="custom">Personalizzato</option></select></div>
+<div><label for="orientation">Orientamento</label><select id="orientation"><option value="portrait">Verticale</option><option value="landscape">Orizzontale</option></select></div>
+<div id="customW" hidden><label for="sensorW">Larghezza sensore · mm</label><input id="sensorW" type="number" value="36" min="1" step=".1"></div>
+<div id="customH" hidden><label for="sensorH">Altezza sensore · mm</label><input id="sensorH" type="number" value="24" min="1" step=".1"></div>
+<div class="wide"><label for="mode">Quando modifichi la distanza</label><select id="mode"><option value="keepMargin">Mantieni il margine → aggiorna altezza</option><option value="keepHeight">Mantieni l'altezza → aggiorna margine</option></select><div class="small">Distanza, altezza e margine sono collegati. Modificando altezza o margine, il calcolatore ricalcola la distanza.</div></div>
+</div><div class="buttons"><button id="reset" class="button" type="button">Ripristina</button><button id="copy" class="button" type="button">Copia risultati</button><button id="share" class="button" type="button">Condividi</button></div><div id="error" class="error" role="alert" hidden></div></section>
+<section class="card"><h2>Risultati</h2><div class="results">
+<div class="metric"><span>Distanza fotocamera–soggetto</span><strong id="distance">—</strong></div>
+<div class="metric"><span>Profondità di campo</span><strong id="dof">—</strong></div>
+<div class="metric alt"><span>Limite vicino</span><strong id="near">—</strong></div>
+<div class="metric alt"><span>Limite lontano</span><strong id="far">—</strong></div>
+<div class="metric alt"><span>Iperfocale</span><strong id="hyper">—</strong></div>
+<div class="metric alt"><span>Angolo di campo verticale</span><strong id="angle">—</strong></div></div>
+<h2 style="margin-top:22px">Intervallo di nitidezza accettabile</h2>
+<div class="viz"><div id="range" class="range"></div><div id="focusMark" class="line focus"></div><div id="nearMark" class="line"></div><div id="farMark" class="line"></div><div id="nearTag" class="tag near">INIZIO <span id="nearTagValue"></span></div><div id="farTag" class="tag far">FINE <span id="farTagValue"></span></div></div>
+<div class="scales"><span id="scaleStart"></span><span id="scaleFocus"></span><span id="scaleEnd"></span></div><div class="small">Le etichette INIZIO e FINE sono i limiti della nitidezza accettabile. La linea tratteggiata è il piano di fuoco. Le distanze sono approssimate con il modello a lente sottile.</div></section>
+<section class="card"><h2>Confronto diaframmi alla stessa distanza</h2><table><thead><tr><th>Diaframma</th><th>Vicino</th><th>Lontano</th><th>DoF</th></tr></thead><tbody id="compare"></tbody></table></section>
+<p class="small">I valori sono teorici e dipendono dal circolo di confusione selezionato. I calcoli sono locali e disponibili offline dopo il primo caricamento HTTPS.</p></main>
+<script>
+"use strict";const $=id=>document.getElementById(id),num=id=>Number($(id).value);
+const fmt=(v,d=2)=>v.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d});
+const m=v=>Number.isFinite(v)?fmt(v/1000)+" m":"∞";
+const depthfmt=v=>!Number.isFinite(v)?"∞":v<1000?fmt(v/10,1)+" cm":fmt(v/1000)+" m";
+let summary="";
+function dims(){const v=$("sensor").value;return ({ff:[36,24],sony:[23.5,15.6],canon:[22.3,14.9],m43:[17.3,13],custom:[num("sensorW"),num("sensorH")]})[v]}
+function dof(s,f,n,c){const H=f*f/(n*c)+f,near=H*s/(H+s-f),far=s>=H+f?Infinity:H*s/(H-s+f);return {H,near,far,size:far-near}}
+function update(origin){
+const f=num("focal"),n=num("aperture"),c=num("coc"),d=dims(),v=$("orientation").value==="portrait"?d[0]:d[1];
+let h=num("height"),margin=num("margin"),s;
+const err=$("error");err.hidden=true;
+if(origin==="distance"){s=num("distanceInput")*1000;const frame=(s/f-1)*v;
+if($("mode").value==="keepMargin"){h=frame/(10*(1+margin/100));if(Number.isFinite(h)&&h>0)$("height").value=String(+h.toFixed(3))}
+else{margin=(frame/(10*h)-1)*100;if(Number.isFinite(margin))$("margin").value=String(+margin.toFixed(3))}}
+else{s=f*(1+10*h*(1+margin/100)/v);if(Number.isFinite(s)&&s>0)$("distanceInput").value=String(+(s/1000).toFixed(3))}
+if(![f,n,c,h,margin,s,d[0],d[1]].every(Number.isFinite)||f<=0||n<=0||c<=0||h<=0||s<=f||margin<0||margin>300||v<=0){err.textContent="Valori non compatibili: verifica distanza, altezza e margine (0–300%).";err.hidden=false;return}
+const q=dof(s,f,n,c);$("distance").textContent=m(s);$("dof").textContent=depthfmt(q.size);$("near").textContent=m(q.near);$("far").textContent=m(q.far);$("hyper").textContent=m(q.H);$("angle").textContent=fmt(2*Math.atan(v/(2*f))*180/Math.PI,1)+"°";
+const padding=Math.max(100,Number.isFinite(q.size)?q.size*.5:1000),start=Math.max(0,q.near-padding),end=Number.isFinite(q.far)?q.far+padding:Math.max(s*2,q.near*3);
+const pos=x=>Math.min(100,Math.max(0,100*(x-start)/(end-start))),a=pos(q.near),b=Number.isFinite(q.far)?pos(q.far):100;
+$("range").style.left=a+"%";$("range").style.width=(b-a)+"%";$("focusMark").style.left=pos(s)+"%";$("nearMark").style.left=a+"%";$("farMark").style.left=b+"%";
+$("nearTag").style.left=Math.max(17,Math.min(83,a))+"%";$("farTag").style.left=Math.max(17,Math.min(83,b))+"%";$("nearTagValue").textContent=m(q.near);$("farTagValue").textContent=m(q.far);
+$("scaleStart").textContent=m(start);$("scaleFocus").textContent="Fuoco "+m(s);$("scaleEnd").textContent=m(end);
+const steps=[...new Set([1.4,1.8,2,2.8,4,5.6,8,11,16,n])].sort((a,b)=>a-b);$("compare").replaceChildren(...steps.map(ap=>{const q2=dof(s,f,ap,c),tr=document.createElement("tr");if(ap===n)tr.className="selected";["f/"+ap,m(q2.near),m(q2.far),depthfmt(q2.size)].forEach(x=>{const td=document.createElement("td");td.textContent=x;tr.append(td)});return tr}));
+summary="Focale: "+f+"mm · f/"+n+" · CoC: "+c+"mm\nDistanza: "+m(s)+" · Soggetto: "+fmt(h)+"cm · Margine: "+fmt(margin)+"%\nDoF: "+depthfmt(q.size)+" · Vicino: "+m(q.near)+" · Lontano: "+m(q.far);
+}
+document.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",()=>{if(el.id==="sensor"){const custom=el.value==="custom";$("customW").hidden=!custom;$("customH").hidden=!custom}update(el.id==="distanceInput"||el.id==="mode"?"distance":"other")}));
+$("reset").onclick=()=>{for(const [id,value] of Object.entries({focal:85,aperture:1.8,distanceInput:5.28,height:200,margin:10,coc:.03,sensor:"ff",orientation:"portrait",sensorW:36,sensorH:24,mode:"keepMargin"}))$(id).value=value;$("customW").hidden=$("customH").hidden=true;update("other")};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText(summary);$("copy").textContent="Copiato ✓"}catch{prompt("Copia risultati",summary)}};
+$("share").onclick=async()=>{if(navigator.share){try{await navigator.share({title:"Photo Tools",text:summary})}catch{}}else $("copy").click()};
+update("other");
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+</script></body></html>
